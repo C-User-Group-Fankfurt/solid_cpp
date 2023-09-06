@@ -34,25 +34,22 @@ class PowerTrain final : public Actor {
 
 class Brake final : public Actor {
  public:
-  explicit Brake(double deceleration_limit) : max_acceleration{
-      deceleration_limit} {}
   void control_vehicle(const Trajectory &) override {};
   void set_limit(double deceleration_limit) override {
     max_acceleration = deceleration_limit;
   }
  private:
-  double max_acceleration;
+  double max_acceleration{0};
 };
 
 class SteeringWheel final : public Actor {
  public:
-  explicit SteeringWheel(double torque_limit) : max_torque(torque_limit) {}
   void control_vehicle(const Trajectory &) override {};
   void set_limit(double torque_limit) override {
     max_torque = torque_limit;
   }
  private:
-  double max_torque;
+  double max_torque{0};
 };
 
 class DrivingSystem {
@@ -84,8 +81,10 @@ int main(int, char **) {
   auto planner = std::make_shared<Planner>();
 
   auto power_train = std::make_shared<PowerTrain>();
-  auto brake = std::make_shared<Brake>(20.0);
-  auto steering_wheel = std::make_shared<SteeringWheel>(3);
+  auto brake = std::make_shared<Brake>();
+  brake->set_limit(20.0);
+  auto steering_wheel = std::make_shared<SteeringWheel>();
+  steering_wheel->set_limit(3);
 
   DrivingSystem driving_system(sensor, planner,
                                {power_train, brake, steering_wheel});
