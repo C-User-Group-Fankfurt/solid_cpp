@@ -23,33 +23,40 @@ class Actor {
  public:
   virtual ~Actor() = default;
   virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
-  virtual void set_limit(double /*limit*/) = 0;
+};
+
+using MetersPerSquareSecond = double;
+struct Acceleration {
+  MetersPerSquareSecond value{0};
 };
 
 class PowerTrain final : public Actor {
  public:
+  explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double /*acceleration_limit*/) override {}
+ private :
+  Acceleration acceleration_limit;
 };
 
 class Brake final : public Actor {
  public:
+  explicit Brake(const Acceleration& deceleration_limit) : deceleration_limit(deceleration_limit) {};
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double deceleration_limit) override {
-    max_acceleration = deceleration_limit;
-  }
  private:
-  double max_acceleration{0};
+  Acceleration deceleration_limit;
+};
+
+using NewtonMetre = double;
+struct Torque {
+  NewtonMetre value{0};
 };
 
 class SteeringWheel final : public Actor {
  public:
+  explicit SteeringWheel(const Torque& torque_limit) : torque_limit(torque_limit) {}
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double torque_limit) override {
-    max_torque = torque_limit;
-  }
  private:
-  double max_torque{0};
+  Torque torque_limit;
 };
 
 class DrivingSystem {
@@ -80,11 +87,12 @@ int main(int, char **) {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
 
-  auto power_train = std::make_shared<PowerTrain>();
-  auto brake = std::make_shared<Brake>();
-  brake->set_limit(20.0);
-  auto steering_wheel = std::make_shared<SteeringWheel>();
-  steering_wheel->set_limit(3);
+  auto power_train = std::make_shared<PowerTrain>(
+      Acceleration{MetersPerSquareSecond(13.6)});
+  auto brake = std::make_shared<Brake>(
+      Acceleration{MetersPerSquareSecond{21.0}});
+  auto steering_wheel = std::make_shared<SteeringWheel>(
+      Torque{NewtonMetre{3.0}});
 
   DrivingSystem driving_system(sensor, planner,
                                {power_train, brake, steering_wheel});
