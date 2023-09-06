@@ -11,12 +11,19 @@ class Sensor {
 
 class Trajectory {
  public:
-  void drive() {}
+  void control_vehicle() {};
 };
 
 class Planner {
  public:
   Trajectory plan_vehicle_behavior(const EnvironmentModel &/*environment*/) {
+    return Trajectory{};
+  }
+};
+
+class Actor {
+ public:
+  Trajectory control_vehicle(const EnvironmentModel &/*environment*/) {
     return Trajectory{};
   }
 };
@@ -31,7 +38,7 @@ class DrivingSystem {
   void one_cycle() {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
-    vehicle_trajectory.drive();
+    vehicle_trajectory.control_vehicle();
   }
 
  private:
