@@ -9,20 +9,19 @@ class Sensor {
   }
 };
 
-
 struct SteeringAngle {};
 struct Acceleration {};
 struct Torque {};
 
 class Actor {
-  void set_steering_angle(const SteeringAngle& /*steering_angle*/) {}
-  void set_power_train(const Acceleration& /*acceleration*/) {}
-  void set_brake_torque(const Torque& /*brake_torque*/) {}
+  void set_steering_angle(const SteeringAngle & /*steering_angle*/) {}
+  void set_power_train(const Acceleration & /*acceleration*/) {}
+  void set_brake_torque(const Torque & /*brake_torque*/) {}
 };
 
 class Trajectory {
  public:
-  void drive(Actor& /*actor*/) {}
+  void drive(Actor & /*actor*/) {}
 };
 
 class Planner {
@@ -31,9 +30,8 @@ class Planner {
     return Trajectory{};
   }
 
-  void drive(Actor& /*actor*/) {}
+  void drive(Actor & /*actor*/) {}
 };
-
 
 class DrivingSystem {
  public:
@@ -55,7 +53,6 @@ class DrivingSystem {
   std::shared_ptr<Planner> planner;
   std::shared_ptr<Actor> actor;
 };
-
 
 int main(int, char **) {
   auto sensor = std::make_shared<Sensor>();
