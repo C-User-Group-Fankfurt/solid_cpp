@@ -9,74 +9,60 @@ class Sensor {
   }
 };
 
-struct Trajectory {};
-class Planner {
- public:
-  Trajectory plan_vehicle_behavior(const EnvironmentModel &environment) {
-    return Trajectory{};
-  }
-};
+
+struct SteeringAngle {};
+struct Acceleration {};
+struct Torque {};
 
 class Actor {
- public:
-  virtual ~Actor() = default;
-  virtual void follow_trajectory(const Trajectory &trjectory) = 0;
+  void set_steering_angle(const SteeringAngle& /*steering_angle*/) {}
+  void set_power_train(const Acceleration& /*acceleration*/) {}
+  void set_brake_torque(const Torque& /*brake_torque*/) {}
 };
+
+class Trajectory {
+ public:
+  void drive(Actor& /*actor*/) {}
+};
+
+class Planner {
+ public:
+  Trajectory plan_vehicle_behavior(const EnvironmentModel &/*environment*/) {
+    return Trajectory{};
+  }
+
+  void drive(Actor& /*actor*/) {}
+};
+
 
 class DrivingSystem {
  public:
   DrivingSystem(std::shared_ptr<Sensor> sensor,
                 std::shared_ptr<Planner> planner,
-                std::vector<std::shared_ptr<Actor>> actors) :
+                std::shared_ptr<Actor> actor) :
       sensor(std::move(sensor)),
       planner(std::move(planner)),
-      actors(std::move(actors)) {}
+      actor(std::move(actor)) {}
 
   void one_cycle() {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
-    act(vehicle_trajectory);
+    vehicle_trajectory.drive(*actor);
   }
 
  private:
   std::shared_ptr<Sensor> sensor;
   std::shared_ptr<Planner> planner;
-  std::vector<std::shared_ptr<Actor>> actors;
-
-  void act(const Trajectory &vehicle_trajectory) {
-    for (auto &actor : actors) {
-      actor->follow_trajectory(vehicle_trajectory);
-    }
-  }
+  std::shared_ptr<Actor> actor;
 };
 
-class Brake : public Actor {
-  // This might have a function to de-/activate emergency braking
-  void follow_trajectory(const Trajectory &trajectory) override {
-  }
-};
-
-class SteeringWheel : public Actor {
-  void follow_trajectory(const Trajectory &trajectory) override {
-  }
-};
-
-class TurnIndicator : public Actor {
-  // This might need the environment model additionally to detect turns
-  void follow_trajectory(const Trajectory &trajectory) override {
-  }
-};
 
 int main(int, char **) {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
-
-  auto brake = std::make_shared<Brake>();
-  auto steering_wheel = std::make_shared<SteeringWheel>();
-  auto turn_indicator = std::make_shared<TurnIndicator>();
+  auto actor = std::make_shared<Actor>();
 
   DrivingSystem driving_system(
-      sensor, planner,
-      {brake, steering_wheel, turn_indicator});
+      sensor, planner, actor);
   driving_system.one_cycle();
 }
