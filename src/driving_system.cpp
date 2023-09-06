@@ -21,42 +21,58 @@ class Planner {
 
 class Actor {
  public:
-  void control_power_train(const Trajectory & /*trajectory*/) {}
-  void control_brake(const Trajectory & /*trajectory*/) {}
-  void control_steering_wheel(const Trajectory & /*trajectory*/) {}
-  void control_direction_indicator(const Trajectory & /*trajectory*/,
-                                   const EnvironmentModel & /*environmen*/) {}
+  virtual ~Actor() = default;
+  virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
+};
+
+class PowerTrain : public Actor {
+ public:
+  void control_vehicle(const Trajectory &) override {};
+};
+
+class Brake : public Actor {
+ public:
+  void control_vehicle(const Trajectory &) override {};
+};
+
+class SteeringWheel : public Actor {
+ public:
+  void control_vehicle(const Trajectory &) override {};
 };
 
 class DrivingSystem {
  public:
+  using Actors = std::vector<std::shared_ptr<Actor>>;
   DrivingSystem(std::shared_ptr<Sensor> sensor,
                 std::shared_ptr<Planner> planner,
-                std::shared_ptr<Actor> actor) :
+                Actors actors) :
       sensor(std::move(sensor)),
       planner(std::move(planner)),
-      actor(std::move(actor)) {};
+      actors(std::move(actors)) {};
 
   void one_cycle() {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
-    actor->control_brake(vehicle_trajectory);
-    actor->control_power_train(vehicle_trajectory);
-    actor->control_steering_wheel(vehicle_trajectory);
-    actor->control_direction_indicator(vehicle_trajectory, environment_model);
+
+    for (auto &actor : actors)
+      actor->control_vehicle(vehicle_trajectory);
   }
 
  private:
   std::shared_ptr<Sensor> sensor;
   std::shared_ptr<Planner> planner;
-  std::shared_ptr<Actor> actor;
+  Actors actors;
 };
 
 int main(int, char **) {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
-  auto actor = std::make_shared<Actor>();
 
-  DrivingSystem driving_system(sensor, planner, actor);
+  auto power_train = std::make_shared<PowerTrain>();
+  auto brake = std::make_shared<Brake>();
+  auto steering_wheel = std::make_shared<SteeringWheel>();
+
+  DrivingSystem driving_system(sensor, planner,
+                               {power_train, brake, steering_wheel});
   driving_system.one_cycle();
 }
