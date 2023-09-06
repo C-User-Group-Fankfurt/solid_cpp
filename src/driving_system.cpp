@@ -21,13 +21,6 @@ class Planner {
   }
 };
 
-class Actor {
- public:
-  Trajectory control_vehicle(const EnvironmentModel &/*environment*/) {
-    return Trajectory{};
-  }
-};
-
 class DrivingSystem {
  public:
   DrivingSystem(std::shared_ptr<Sensor> sensor,
