@@ -10,8 +10,6 @@ class Sensor {
 };
 
 class Trajectory {
- public:
-  void control_vehicle() {};
 };
 
 class Planner {
@@ -21,29 +19,44 @@ class Planner {
   }
 };
 
+class Actor {
+ public:
+  void control_power_train(const Trajectory & /*trajectory*/) {}
+  void control_brake(const Trajectory & /*trajectory*/) {}
+  void control_steering_wheel(const Trajectory & /*trajectory*/) {}
+  void control_direction_indicator(const Trajectory & /*trajectory*/,
+                                   const EnvironmentModel & /*environmen*/) {}
+};
+
 class DrivingSystem {
  public:
   DrivingSystem(std::shared_ptr<Sensor> sensor,
-                std::shared_ptr<Planner> planner) :
+                std::shared_ptr<Planner> planner,
+                std::shared_ptr<Actor> actor) :
       sensor(std::move(sensor)),
-      planner(std::move(planner)) {};
+      planner(std::move(planner)),
+      actor(std::move(actor)) {};
 
   void one_cycle() {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
-    vehicle_trajectory.control_vehicle();
+    actor->control_brake(vehicle_trajectory);
+    actor->control_power_train(vehicle_trajectory);
+    actor->control_steering_wheel(vehicle_trajectory);
+    actor->control_direction_indicator(vehicle_trajectory, environment_model);
   }
 
  private:
   std::shared_ptr<Sensor> sensor;
   std::shared_ptr<Planner> planner;
+  std::shared_ptr<Actor> actor;
 };
 
 int main(int, char **) {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
+  auto actor = std::make_shared<Actor>();
 
-  DrivingSystem driving_system(
-      sensor, planner);
+  DrivingSystem driving_system(sensor, planner, actor);
   driving_system.one_cycle();
 }
