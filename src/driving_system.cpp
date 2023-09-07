@@ -19,13 +19,16 @@ class Planner {
   }
 };
 
+enum class DrivingMode { normal, emergency };
+class DrivingModeNotSupported : public std::logic_error {
+  using std::logic_error::logic_error;
+};
 
 class Actor {
  public:
   virtual ~Actor() = default;
-  virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
+  virtual void control_vehicle(const Trajectory &, const DrivingMode &) = 0;
 };
-
 
 using MetresPerSquareSecond = double;
 struct Acceleration {
@@ -34,21 +37,26 @@ struct Acceleration {
 
 class PowerTrain final : public Actor {
  public:
-  explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
-  void control_vehicle(const Trajectory &) override {};
+  explicit PowerTrain(const Acceleration &acceleration_limit)
+      : acceleration_limit(acceleration_limit) {}
+  void control_vehicle(const Trajectory &,
+                       const DrivingMode &driving_mode) override {
+    if (driving_mode == DrivingMode::emergency)
+      throw DrivingModeNotSupported(
+          "Power train won't operate in emergency mode.");
+  };
  private :
   Acceleration acceleration_limit;
 };
 
-
 class Brake final : public Actor {
  public:
-  explicit Brake(const Acceleration& deceleration_limit) : deceleration_limit(deceleration_limit) {};
-  void control_vehicle(const Trajectory &) override {};
+  explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
+      deceleration_limit) {};
+  void control_vehicle(const Trajectory &, const DrivingMode &) override {};
  private:
   Acceleration deceleration_limit;
 };
-
 
 using NewtonMetre = double;
 struct Torque {
@@ -57,12 +65,12 @@ struct Torque {
 
 class SteeringWheel final : public Actor {
  public:
-  explicit SteeringWheel(const Torque& torque_limit) : torque_limit(torque_limit) {}
-  void control_vehicle(const Trajectory &) override {};
+  explicit SteeringWheel(const Torque &torque_limit)
+      : torque_limit(torque_limit) {}
+  void control_vehicle(const Trajectory &, const DrivingMode &) override {};
  private:
   Torque torque_limit;
 };
-
 
 class DrivingSystem {
  public:
@@ -74,12 +82,12 @@ class DrivingSystem {
       planner(std::move(planner)),
       actors(std::move(actors)) {};
 
-  void one_cycle() {
+  void one_cycle(const DrivingMode &driving_mode) {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
 
     for (auto &actor : actors)
-      actor->control_vehicle(vehicle_trajectory);
+      actor->control_vehicle(vehicle_trajectory, driving_mode);
   }
 
  private:
@@ -101,5 +109,6 @@ int main(int, char **) {
 
   DrivingSystem driving_system(sensor, planner,
                                {power_train, brake, steering_wheel});
-  driving_system.one_cycle();
+  const auto driving_mode = DrivingMode::normal;
+  driving_system.one_cycle(driving_mode);
 }
