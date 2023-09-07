@@ -29,27 +29,31 @@ class Actor {
 class PowerTrain final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double /*acceleration_limit*/) override {}
+  void set_limit(double acceleration_limit_metres_per_second) override {
+  max_acceleration_metres_per_second = acceleration_limit_metres_per_second;
+}
+private:
+double max_acceleration_metres_per_second{0};
 };
 
 class Brake final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double deceleration_limit) override {
-    max_acceleration = deceleration_limit;
+  void set_limit(double deceleration_limit_metres_per_second) override {
+    max_deceleration_metres_per_second = deceleration_limit_metres_per_second;
   }
  private:
-  double max_acceleration{0};
+  double max_deceleration_metres_per_second{0};
 };
 
 class SteeringWheel final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
-  void set_limit(double torque_limit) override {
-    max_torque = torque_limit;
+  void set_limit(double torque_limit_newton_metres) override {
+    max_torque_newton_metres = torque_limit_newton_metres;
   }
  private:
-  double max_torque{0};
+  double max_torque_newton_metres{0};
 };
 
 class DrivingSystem {
