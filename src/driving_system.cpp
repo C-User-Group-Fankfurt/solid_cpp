@@ -19,15 +19,17 @@ class Planner {
   }
 };
 
+
 class Actor {
  public:
   virtual ~Actor() = default;
   virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
 };
 
-using MetersPerSquareSecond = double;
+
+using MetresPerSquareSecond = double;
 struct Acceleration {
-  MetersPerSquareSecond value{0};
+  MetresPerSquareSecond value{0};
 };
 
 class PowerTrain final : public Actor {
@@ -38,6 +40,7 @@ class PowerTrain final : public Actor {
   Acceleration acceleration_limit;
 };
 
+
 class Brake final : public Actor {
  public:
   explicit Brake(const Acceleration& deceleration_limit) : deceleration_limit(deceleration_limit) {};
@@ -45,6 +48,7 @@ class Brake final : public Actor {
  private:
   Acceleration deceleration_limit;
 };
+
 
 using NewtonMetre = double;
 struct Torque {
@@ -58,6 +62,7 @@ class SteeringWheel final : public Actor {
  private:
   Torque torque_limit;
 };
+
 
 class DrivingSystem {
  public:
@@ -88,9 +93,9 @@ int main(int, char **) {
   auto planner = std::make_shared<Planner>();
 
   auto power_train = std::make_shared<PowerTrain>(
-      Acceleration{MetersPerSquareSecond(13.6)});
+      Acceleration{MetresPerSquareSecond(13.6)});
   auto brake = std::make_shared<Brake>(
-      Acceleration{MetersPerSquareSecond{21.0}});
+      Acceleration{MetresPerSquareSecond{21.0}});
   auto steering_wheel = std::make_shared<SteeringWheel>(
       Torque{NewtonMetre{3.0}});
 
