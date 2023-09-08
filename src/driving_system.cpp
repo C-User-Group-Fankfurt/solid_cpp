@@ -24,8 +24,6 @@ class Actor {
   void control_power_train(const Trajectory & /*trajectory*/) {}
   void control_brake(const Trajectory & /*trajectory*/) {}
   void control_steering_wheel(const Trajectory & /*trajectory*/) {}
-  void control_direction_indicator(const Trajectory & /*trajectory*/,
-                                   const EnvironmentModel & /*environmen*/) {}
 };
 
 class DrivingSystem {
@@ -43,7 +41,6 @@ class DrivingSystem {
     actor->control_brake(vehicle_trajectory);
     actor->control_power_train(vehicle_trajectory);
     actor->control_steering_wheel(vehicle_trajectory);
-    actor->control_direction_indicator(vehicle_trajectory, environment_model);
   }
 
  private:
