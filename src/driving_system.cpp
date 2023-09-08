@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -53,8 +54,21 @@ class Brake final : public Actor {
  public:
   explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
       deceleration_limit) {};
-  void control_vehicle(const Trajectory &, const DrivingMode &) override {};
+  void control_vehicle(const Trajectory &,
+                       const DrivingMode &driving_mode) override {
+    auto &current_limit = get_current_limit(driving_mode);
+
+  };
  private:
+  const Acceleration &get_current_limit(const DrivingMode &driving_mode) {
+    static const Acceleration
+        unlimited_acceleration{std::numeric_limits<double>::max()};
+    if (driving_mode == DrivingMode::normal)
+      return deceleration_limit;
+    else
+      return unlimited_acceleration;
+  }
+
   Acceleration deceleration_limit;
 };
 
@@ -67,7 +81,9 @@ class SteeringWheel final : public Actor {
  public:
   explicit SteeringWheel(const Torque &torque_limit)
       : torque_limit(torque_limit) {}
-  void control_vehicle(const Trajectory &, const DrivingMode &) override {};
+  void control_vehicle(const Trajectory &, const DrivingMode &) override {
+  };
+
  private:
   Torque torque_limit;
 };
