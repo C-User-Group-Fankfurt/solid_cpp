@@ -40,6 +40,10 @@ using MetresPerSquareSecond = double;
 struct Acceleration {
   MetresPerSquareSecond value{0};
 };
+std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
+  stream << value.value << " metres per square second";
+  return stream;
+}
 
 class PowerTrain final : public Actor {
  public:
@@ -54,13 +58,16 @@ class Brake final : public DrivingModeAwareActor {
  public:
   explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
       deceleration_limit) {};
+
   void control_vehicle(const Trajectory &) override {
     auto &current_deceleration_limit = get_current_deceleration_limit();
-    std::cout << "Current limit = " << current_deceleration_limit.value;
+    std::cout << current_deceleration_limit << std::endl;
   };
+
   void set_driving_mode(const DrivingMode &driving_mode) override {
     current_driving_mode = driving_mode;
   }
+
  private:
   [[nodiscard]] const Acceleration &
   get_current_deceleration_limit() const {
