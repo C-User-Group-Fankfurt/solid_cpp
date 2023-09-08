@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -53,10 +54,26 @@ class Brake final : public DrivingModeAwareActor {
  public:
   explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
       deceleration_limit) {};
-  void control_vehicle(const Trajectory &) override {};
-  void set_driving_mode(const DrivingMode &) override {}
+  void control_vehicle(const Trajectory &) override {
+    auto &current_deceleration_limit = get_current_deceleration_limit();
+    std::cout << "Current limit = " << current_deceleration_limit.value;
+  };
+  void set_driving_mode(const DrivingMode &driving_mode) override {
+    current_driving_mode = driving_mode;
+  }
  private:
+  [[nodiscard]] const Acceleration &
+  get_current_deceleration_limit() const {
+    static const Acceleration
+        unlimited_deceleration{std::numeric_limits<double>::lowest()};
+    if (current_driving_mode == DrivingMode::normal)
+      return deceleration_limit;
+    else
+      return unlimited_deceleration;
+  }
+
   Acceleration deceleration_limit;
+  DrivingMode current_driving_mode{DrivingMode::normal};
 };
 
 using NewtonMetre = double;
