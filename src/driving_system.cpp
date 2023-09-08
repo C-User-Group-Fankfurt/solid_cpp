@@ -35,6 +35,10 @@ using MetresPerSquareSecond = double;
 struct Acceleration {
   MetresPerSquareSecond value{0};
 };
+std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
+  stream << value.value << " metres per square second";
+  return stream;
+}
 
 class PowerTrain final : public Actor {
  public:
@@ -54,19 +58,22 @@ class Brake final : public Actor {
  public:
   explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
       deceleration_limit) {};
+
   void control_vehicle(const Trajectory &,
                        const DrivingMode &driving_mode) override {
-    auto &current_limit = get_current_limit(driving_mode);
-
+    auto &current_limit = get_current_deceleration_limit(driving_mode);
+    std::cout << current_limit << std::endl;
   };
+
  private:
-  const Acceleration &get_current_limit(const DrivingMode &driving_mode) {
+  [[nodiscard]] const Acceleration &
+  get_current_deceleration_limit(const DrivingMode &driving_mode) const {
     static const Acceleration
-        unlimited_acceleration{std::numeric_limits<double>::max()};
+        unlimited_deceleration{std::numeric_limits<double>::lowest()};
     if (driving_mode == DrivingMode::normal)
       return deceleration_limit;
     else
-      return unlimited_acceleration;
+      return unlimited_deceleration;
   }
 
   Acceleration deceleration_limit;
@@ -82,6 +89,7 @@ class SteeringWheel final : public Actor {
   explicit SteeringWheel(const Torque &torque_limit)
       : torque_limit(torque_limit) {}
   void control_vehicle(const Trajectory &, const DrivingMode &) override {
+    // ...
   };
 
  private:
