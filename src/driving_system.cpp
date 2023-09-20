@@ -49,7 +49,7 @@ class DrivingSystem {
   std::shared_ptr<Actors> actor;
 };
 
-int main(int, char **) {
+int main() {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
   auto actor = std::make_shared<Actors>();
