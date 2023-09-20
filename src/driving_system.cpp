@@ -59,6 +59,7 @@ class SteeringWheel final : public Actor {
 class DrivingSystem {
  public:
   using Actors = std::vector<std::shared_ptr<Actor>>;
+
   DrivingSystem(std::shared_ptr<Sensor> sensor,
                 std::shared_ptr<Planner> planner,
                 Actors actors) :
@@ -80,7 +81,7 @@ class DrivingSystem {
   Actors actors;
 };
 
-int main(int, char **) {
+int main() {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
 
