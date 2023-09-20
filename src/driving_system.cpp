@@ -11,7 +11,13 @@ class Sensor {
 
 class Trajectory {
  public:
-  void control_vehicle() {};
+  void control_vehicle() {
+    //control_power_train(internals, power_train_connection);
+    //control_brake(internals, brake_connection);
+    //control_steering(internals, steering_connection);
+  };
+ private:
+  //TrajectoryData internals;
 };
 
 class Planner {
