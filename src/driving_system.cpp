@@ -45,7 +45,7 @@ class DrivingSystem {
   std::shared_ptr<Planner> planner;
 };
 
-int main(int, char **) {
+int main() {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
 
