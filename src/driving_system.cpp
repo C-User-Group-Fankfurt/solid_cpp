@@ -9,15 +9,32 @@ class Sensor {
   }
 };
 
+namespace control_actuators {
+using PowerTrainConnection = int;
+using BrakeConnection = int;
+using SteeringConnection = int;
+using ControlSignals = int;
+
+void control_power_train(const ControlSignals &, PowerTrainConnection &) {}
+void control_brake(const ControlSignals &, BrakeConnection &) {}
+void control_steering(const ControlSignals &, SteeringConnection &) {}
+}
+
 class Trajectory {
  public:
   void control_vehicle() {
-    //control_power_train(internals, power_train_connection);
-    //control_brake(internals, brake_connection);
-    //control_steering(internals, steering_connection);
+    using namespace control_actuators;
+    control_power_train(internals, power_train_connection);
+    control_brake(internals, brake_connection);
+    control_steering(internals, steering_connection);
   };
  private:
-  //TrajectoryData internals;
+  using TrajectoryData = int;
+  TrajectoryData internals{};
+
+  control_actuators::PowerTrainConnection power_train_connection{};
+  control_actuators::BrakeConnection brake_connection{};
+  control_actuators::SteeringConnection steering_connection{};
 };
 
 class Planner {
