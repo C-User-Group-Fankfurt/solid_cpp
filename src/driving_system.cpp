@@ -17,7 +17,7 @@ using ControlSignals = int;
 
 void control_power_train(const ControlSignals &, PowerTrainConnection &) {}
 void control_brake(const ControlSignals &, BrakeConnection &) {}
-void control_steering(const ControlSignals &, SteeringConnection &) {}
+void control_steering_wheel(const ControlSignals &, SteeringConnection &) {}
 }
 
 class Trajectory {
@@ -26,7 +26,7 @@ class Trajectory {
     using namespace control_actuators;
     control_power_train(internals, power_train_connection);
     control_brake(internals, brake_connection);
-    control_steering(internals, steering_connection);
+    control_steering_wheel(internals, steering_wheel_connection);
   };
  private:
   using TrajectoryData = int;
@@ -34,7 +34,7 @@ class Trajectory {
 
   control_actuators::PowerTrainConnection power_train_connection{};
   control_actuators::BrakeConnection brake_connection{};
-  control_actuators::SteeringConnection steering_connection{};
+  control_actuators::SteeringConnection steering_wheel_connection{};
 };
 
 class Planner {
