@@ -31,11 +31,6 @@ class Actor {
   virtual void control_vehicle(const Trajectory &) = 0;
 };
 
-class DrivingModeAwareActor : public Actor {
- public:
-  virtual void set_driving_mode(const DrivingMode &) = 0;
-};
-
 using MetresPerSquareSecond = double;
 struct Acceleration {
   MetresPerSquareSecond value{0};
@@ -45,57 +40,63 @@ std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
   return stream;
 }
 
+using NewtonMetre = double;
+struct Torque {
+    NewtonMetre value{0};
+};
+
+class ActorLimitHandler {
+public:
+    static ActorLimitHandler& get_instance () {
+        static ActorLimitHandler actor_limiter;
+        return actor_limiter;
+    }
+
+    void set_driving_mode(const DrivingMode &driving_mode) {
+        current_driving_mode = driving_mode;
+    }
+
+    Acceleration get_current_deceleration_limit() {
+        static const Acceleration
+                unlimited_deceleration{std::numeric_limits<double>::lowest()};
+        if (current_driving_mode == DrivingMode::normal)
+            return deceleration_limit;
+        else
+            return unlimited_deceleration;
+    }
+
+    Torque get_current_torque_limit(){/*...*/return torque_limit;};
+
+private:
+    ActorLimitHandler() = default;
+    Acceleration deceleration_limit{Acceleration{MetresPerSquareSecond{21.0}}};
+    Torque torque_limit{Torque{NewtonMetre{3.0}}};
+    DrivingMode current_driving_mode{DrivingMode::normal};
+};
+
 class PowerTrain final : public Actor {
  public:
   explicit PowerTrain(const Acceleration &acceleration_limit)
       : acceleration_limit(acceleration_limit) {}
-  void control_vehicle(const Trajectory &) override {};
+  void control_vehicle(const Trajectory &) override {/*...*/};
  private :
   Acceleration acceleration_limit;
 };
 
-class Brake final : public DrivingModeAwareActor {
+class Brake final : public Actor {
  public:
-  explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
-      deceleration_limit) {};
+  Brake() = default;
 
   void control_vehicle(const Trajectory &) override {
-    auto &current_deceleration_limit = get_current_deceleration_limit();
+    auto current_deceleration_limit = ActorLimitHandler::get_instance().get_current_deceleration_limit();
     std::cout << current_deceleration_limit << std::endl;
   };
-
-  void set_driving_mode(const DrivingMode &driving_mode) override {
-    current_driving_mode = driving_mode;
-  }
-
- private:
-  [[nodiscard]] const Acceleration &
-  get_current_deceleration_limit() const {
-    static const Acceleration
-        unlimited_deceleration{std::numeric_limits<double>::lowest()};
-    if (current_driving_mode == DrivingMode::normal)
-      return deceleration_limit;
-    else
-      return unlimited_deceleration;
-  }
-
-  Acceleration deceleration_limit;
-  DrivingMode current_driving_mode{DrivingMode::normal};
 };
 
-using NewtonMetre = double;
-struct Torque {
-  NewtonMetre value{0};
-};
-
-class SteeringWheel final : public DrivingModeAwareActor {
+class SteeringWheel final : public Actor {
  public:
-  explicit SteeringWheel(const Torque &torque_limit)
-      : torque_limit(torque_limit) {}
-  void control_vehicle(const Trajectory &) override {};
-  void set_driving_mode(const DrivingMode &) override {}
- private:
-  Torque torque_limit;
+  SteeringWheel() = default;
+  void control_vehicle(const Trajectory &) override {/*...*/};
 };
 
 class DrivingSystem {
@@ -128,17 +129,19 @@ int main(int, char **) {
 
   auto power_train = std::make_shared<PowerTrain>(
       Acceleration{MetresPerSquareSecond(13.6)});
-  auto brake = std::make_shared<Brake>(
-      Acceleration{MetresPerSquareSecond{21.0}});
-  auto steering_wheel = std::make_shared<SteeringWheel>(
-      Torque{NewtonMetre{3.0}});
+  auto brake = std::make_shared<Brake>();
+  auto steering_wheel = std::make_shared<SteeringWheel>();
 
   DrivingSystem driving_system(sensor, planner,
                                {power_train, brake, steering_wheel});
 
-  const auto driving_mode = DrivingMode::normal;
-  brake->set_driving_mode(driving_mode);
-  steering_wheel->set_driving_mode(driving_mode);
+  auto driving_mode = DrivingMode::normal;
+  ActorLimitHandler::get_instance().set_driving_mode(driving_mode);
+
+  driving_system.one_cycle();
+
+  driving_mode = DrivingMode::emergency;
+  ActorLimitHandler::get_instance().set_driving_mode(driving_mode);
 
   driving_system.one_cycle();
 }
