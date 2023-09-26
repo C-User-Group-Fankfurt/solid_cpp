@@ -42,6 +42,37 @@ std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
   return stream;
 }
 
+using NewtonMetre = double;
+struct Torque {
+    NewtonMetre value{0};
+};
+
+class ActorLimitHandler {
+public:
+    explicit ActorLimitHandler(const Acceleration &deceleration_limit, const Torque &torque_limit)
+            : deceleration_limit(deceleration_limit), torque_limit(torque_limit){};
+
+    void set_driving_mode(const DrivingMode &driving_mode) {
+        current_driving_mode = driving_mode;
+    }
+
+    Acceleration get_current_deceleration_limit() {
+        static const Acceleration
+                unlimited_deceleration{std::numeric_limits<double>::lowest()};
+        if (current_driving_mode == DrivingMode::normal)
+            return deceleration_limit;
+        else
+            return unlimited_deceleration;
+    }
+
+    Torque get_current_torque_limit(){/*...*/return torque_limit;};
+
+private:
+    Acceleration deceleration_limit;
+    Torque torque_limit;
+    DrivingMode current_driving_mode{DrivingMode::normal};
+};
+
 class PowerTrain final : public Actor {
  public:
   explicit PowerTrain(const Acceleration &acceleration_limit)
@@ -64,11 +95,6 @@ class Brake final : public Actor {
 
  private:
     DecelerationLimitCallback get_current_deceleration_limit;
-};
-
-using NewtonMetre = double;
-struct Torque {
-  NewtonMetre value{0};
 };
 
 using TorqueLimitCallback = std::function<Torque()>;
@@ -103,32 +129,6 @@ class DrivingSystem {
   std::shared_ptr<Sensor> sensor;
   std::shared_ptr<Planner> planner;
   Actors actors;
-};
-
-class ActorLimitHandler {
-public:
-    explicit ActorLimitHandler(const Acceleration &deceleration_limit, const Torque &torque_limit)
-            : deceleration_limit(deceleration_limit), torque_limit(torque_limit){};
-
-    void set_driving_mode(const DrivingMode &driving_mode) {
-        current_driving_mode = driving_mode;
-    }
-
-    Acceleration get_current_deceleration_limit() {
-        static const Acceleration
-                unlimited_deceleration{std::numeric_limits<double>::lowest()};
-        if (current_driving_mode == DrivingMode::normal)
-            return deceleration_limit;
-        else
-            return unlimited_deceleration;
-    }
-
-    Torque get_current_torque_limit(){/*...*/return torque_limit;};
-
-private:
-    Acceleration deceleration_limit;
-    Torque torque_limit;
-    DrivingMode current_driving_mode{DrivingMode::normal};
 };
 
 int main(int, char **) {
