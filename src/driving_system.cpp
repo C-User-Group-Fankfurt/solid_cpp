@@ -21,9 +21,6 @@ class Planner {
 };
 
 enum class DrivingMode { normal, emergency };
-class DrivingModeNotSupported : public std::logic_error {
-  using std::logic_error::logic_error;
-};
 
 class Actor {
  public:
