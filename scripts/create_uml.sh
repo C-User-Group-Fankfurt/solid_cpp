@@ -2,9 +2,7 @@
 
 set -e
 
-cd cmake-build-debug
-cmake ..
-cd ..
+cmake --build build --config Release --target all --parallel
 ~/software/clang-uml/usr/local/bin/clang-uml
 
 BRANCH=`git rev-parse --abbrev-ref HEAD`
