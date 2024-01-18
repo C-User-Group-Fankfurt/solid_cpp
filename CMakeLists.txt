@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(driving_system)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_executable(driving_system
         src/driving_system.cpp
 )
