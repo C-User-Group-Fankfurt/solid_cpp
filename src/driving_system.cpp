@@ -42,8 +42,8 @@ std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
 }
 
 class PowerTrain final : public Actor {
-public:
-    explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
+ public:
+  explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
   void control_vehicle(const Trajectory &,
                        const DrivingMode &driving_mode) override {
     if (driving_mode == DrivingMode::emergency)
