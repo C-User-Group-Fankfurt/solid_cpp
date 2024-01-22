@@ -9,7 +9,9 @@ class Sensor {
   }
 };
 
-class Trajectory {
+struct Trajectory {
+  using TrajectoryData = int;
+  TrajectoryData internals{};
 };
 
 class Planner {
@@ -21,10 +23,15 @@ class Planner {
 
 class Actors {
  public:
+  void control_vehicle(const Trajectory & trajectory) {
+    control_power_train(trajectory);
+    control_brake(trajectory);
+    control_steering_wheel(trajectory);
+  }
+ private:
   void control_power_train(const Trajectory & /*trajectory*/) {}
   void control_brake(const Trajectory & /*trajectory*/) {}
   void control_steering_wheel(const Trajectory & /*trajectory*/) {}
- private:
   // ...
 };
 
@@ -40,9 +47,7 @@ class DrivingSystem {
   void one_cycle() {
     auto environment_model = sensor->model_environment();
     auto vehicle_trajectory = planner->plan_vehicle_behavior(environment_model);
-    actors->control_brake(vehicle_trajectory);
-    actors->control_power_train(vehicle_trajectory);
-    actors->control_steering_wheel(vehicle_trajectory);
+    actors->control_vehicle(vehicle_trajectory);
   }
 
  private:
