@@ -10,7 +10,9 @@ class Sensor {
   }
 };
 
-class Trajectory {
+struct Trajectory {
+  using TrajectoryData = int;
+  TrajectoryData internals{};
 };
 
 class Planner {
@@ -43,7 +45,8 @@ std::ostream &operator<<(std::ostream &stream, const Acceleration &value) {
 
 class PowerTrain final : public Actor {
  public:
-  explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
+  explicit PowerTrain(const Acceleration &acceleration_limit)
+      : acceleration_limit(acceleration_limit) {}
   void control_vehicle(const Trajectory &,
                        const DrivingMode &driving_mode) override {
     if (driving_mode == DrivingMode::emergency)
@@ -120,7 +123,7 @@ class DrivingSystem {
   Actors actors;
 };
 
-int main(int, char **) {
+int main() {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
 
