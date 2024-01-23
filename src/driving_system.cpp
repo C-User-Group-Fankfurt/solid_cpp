@@ -9,7 +9,9 @@ class Sensor {
   }
 };
 
-class Trajectory {
+struct Trajectory {
+  using TrajectoryData = int;
+  TrajectoryData internals{};
 };
 
 class Planner {
