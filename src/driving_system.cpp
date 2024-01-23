@@ -9,7 +9,9 @@ class Sensor {
   }
 };
 
-class Trajectory {
+struct Trajectory {
+  using TrajectoryData = int;
+  TrajectoryData internals{};
 };
 
 class Planner {
@@ -19,13 +21,11 @@ class Planner {
   }
 };
 
-
 class Actor {
  public:
   virtual ~Actor() = default;
   virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
 };
-
 
 using MetresPerSquareSecond = double;
 struct Acceleration {
@@ -34,21 +34,21 @@ struct Acceleration {
 
 class PowerTrain final : public Actor {
  public:
-  explicit PowerTrain(const Acceleration& acceleration_limit) : acceleration_limit(acceleration_limit) {}
+  explicit PowerTrain(const Acceleration &acceleration_limit)
+      : acceleration_limit(acceleration_limit) {}
   void control_vehicle(const Trajectory &) override {};
  private :
   Acceleration acceleration_limit;
 };
 
-
 class Brake final : public Actor {
  public:
-  explicit Brake(const Acceleration& deceleration_limit) : deceleration_limit(deceleration_limit) {};
+  explicit Brake(const Acceleration &deceleration_limit) : deceleration_limit(
+      deceleration_limit) {};
   void control_vehicle(const Trajectory &) override {};
  private:
   Acceleration deceleration_limit;
 };
-
 
 using NewtonMetre = double;
 struct Torque {
@@ -57,16 +57,17 @@ struct Torque {
 
 class SteeringWheel final : public Actor {
  public:
-  explicit SteeringWheel(const Torque& torque_limit) : torque_limit(torque_limit) {}
+  explicit SteeringWheel(const Torque &torque_limit)
+      : torque_limit(torque_limit) {}
   void control_vehicle(const Trajectory &) override {};
  private:
   Torque torque_limit;
 };
 
-
 class DrivingSystem {
  public:
   using Actors = std::vector<std::shared_ptr<Actor>>;
+
   DrivingSystem(std::shared_ptr<Sensor> sensor,
                 std::shared_ptr<Planner> planner,
                 Actors actors) :
@@ -88,7 +89,7 @@ class DrivingSystem {
   Actors actors;
 };
 
-int main(int, char **) {
+int main() {
   auto sensor = std::make_shared<Sensor>();
   auto planner = std::make_shared<Planner>();
 
