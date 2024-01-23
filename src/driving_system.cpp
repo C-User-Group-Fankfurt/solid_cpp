@@ -30,10 +30,10 @@ class PowerTrain final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
   void set_limit(double acceleration_limit_metres_per_second) override {
-  max_acceleration_metres_per_second = acceleration_limit_metres_per_second;
-}
-private:
-double max_acceleration_metres_per_second{0};
+    max_acceleration_metres_per_second = acceleration_limit_metres_per_second;
+  }
+ private:
+  double max_acceleration_metres_per_second{0};
 };
 
 class Brake final : public Actor {
