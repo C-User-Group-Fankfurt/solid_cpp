@@ -27,17 +27,17 @@ class Actor {
   virtual void control_vehicle(const Trajectory & /*trajectory*/) = 0;
 };
 
-class PowerTrain : public Actor {
+class PowerTrain final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
 };
 
-class Brake : public Actor {
+class Brake final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
 };
 
-class SteeringWheel : public Actor {
+class SteeringWheel final : public Actor {
  public:
   void control_vehicle(const Trajectory &) override {};
 };
