@@ -102,6 +102,7 @@ class SteeringWheel final : public Actor {
 class DrivingSystem {
  public:
   using Actors = std::vector<std::shared_ptr<Actor>>;
+
   DrivingSystem(std::shared_ptr<Sensor> sensor,
                 std::shared_ptr<Planner> planner,
                 Actors actors) :
